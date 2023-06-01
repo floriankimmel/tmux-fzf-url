@@ -41,12 +41,15 @@ ips=$(echo "$content" | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}
 gits=$(echo "$content" | grep -oE '(ssh://)?git@\S*' | sed 's/:/\//g' | sed 's/^\(ssh\/\/\/\)\{0,1\}git@\(.*\)$/https:\/\/\2/')
 gh=$(echo "$content" | grep -oE "['\"]([A-Za-z0-9-]*/[.A-Za-z0-9-]*)['\"]" | sed "s/['\"]//g" | sed 's#.#https://github.com/&#')
 git=$(echo "$(git remote get-url origin)"| grep -oE '(ssh://)?git@\S*' | sed 's/:/\//g' | sed 's/^\(ssh\/\/\/\)\{0,1\}git@\(.*\)$/https:\/\/\2/')
+branch=$(git branch --show-current)
+ticket="${branch%_*}"
+prs=$(printf '%s\n' "${git[@]}/pull/$ticket")
 
 if [[ $# -ge 1 && "$1" != '' ]]; then
     extras=$(echo "$content" |eval "$1")
 fi
 
-items=$(printf '%s\n' "${git[@]}" "${urls[@]}" "${wwws[@]}" "${gh[@]}" "${ips[@]}" "${gits[@]}" "${extras[@]}"  |
+items=$(printf '%s\n' "${prs[@]}" "${git[@]}" "${urls[@]}" "${wwws[@]}" "${gh[@]}" "${ips[@]}" "${gits[@]}" "${extras[@]}"  |
     grep -v '^$' |
     sort -u |
     nl -w3 -s '  '
