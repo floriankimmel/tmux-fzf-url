@@ -43,6 +43,11 @@ gh=$(echo "$content" | grep -oE "['\"]([A-Za-z0-9-]*/[.A-Za-z0-9-]*)['\"]" | sed
 git=$(echo "$(git remote get-url origin)"| grep -oE '(ssh://)?git@\S*' | sed 's/:/\//g' | sed 's/^\(ssh\/\/\/\)\{0,1\}git@\(.*\)$/https:\/\/\2/')
 branch=$(git branch --show-current)
 ticket="${branch%_*}"
+
+for (( i=0; i<${#git[@]}; i++ )); do
+  git[$i]=${git[$i]/.git/}
+done
+
 prs=$(printf '%s\n' "${git[@]}/pull/$ticket")
 
 if [[ $# -ge 1 && "$1" != '' ]]; then
