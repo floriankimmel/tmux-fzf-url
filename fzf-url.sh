@@ -42,14 +42,14 @@ gits=$(echo "$content" | grep -oE '(ssh://)?git@\S*' | sed 's/:/\//g' | sed 's/^
 gh=$(echo "$content" | grep -oE "['\"]([A-Za-z0-9-]*/[.A-Za-z0-9-]*)['\"]" | sed "s/['\"]//g" | sed 's#.#https://github.com/&#')
 git=$(echo "$(git remote get-url origin)" | sed 's/:/\//g' | sed 's/^\(ssh\/\/\/\)\{0,1\}git@\(.*\)$/https:\/\/\2/' | sed 's/work-github/github.com/g') 
 branch=$(git branch --show-current)
-ticket="${branch%_*}"
+prNumber="$(gh pr view --json number | jq -r '.number')"
 
 
 for (( i=0; i<${#git[@]}; i++ )); do
   git[$i]=${git[$i]/.git/}
 done
 
-prs=$(printf '%s\n' "${git[@]}/pull/$ticket")
+prs=$(printf '%s\n' "${git[@]}/pull/$prNumber")
 
 if [[ $# -ge 1 && "$1" != '' ]]; then
     extras=$(echo "$content" |eval "$1")
@@ -66,4 +66,5 @@ fzf_filter <<< "$items" | awk '{print $2}' | \
     while read -r chosen; do
         open_url "$chosen" &>"/tmp/tmux-$(id -u)-fzf-url.log"
     done
+
 
